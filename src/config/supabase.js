@@ -1,8 +1,21 @@
 import { createClient } from '@supabase/supabase-js';
+import dotenv from 'dotenv';
 
-const supabaseUrl = 'https://qkgzxcsrffisjtbocqtu.supabase.co'
-const supabaseKey = 'sb_publishable_o9rUKjEdilYfUdSd0793lQ_YXuBw6Vg';
+dotenv.config();
+
+const supabaseUrl = 'https://gsogbwkggoczxsuumwji.supabase.co'
+const supabaseKey = 'sb_publishable_lJqqDGCB0p7X90L6MWKJvA_fNTY2o1W';
 
 console.log("=== CONEXIÓN DIRECTA ACTIVADA ===");
 
+if (!supabaseUrl || !supabaseKey) {
+    console.error("ERROR: Faltan las variables de entorno SUPABASE_URL o SUPABASE_ANON_KEY en el archivo .env");
+    process.exit(1); 
+}
+
 export const supabase = createClient(supabaseUrl, supabaseKey);
+
+
+
+
+
