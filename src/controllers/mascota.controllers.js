@@ -95,3 +95,52 @@ export const eliminarMascota = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
+export const obtenerMedicamentosPorMascota = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        // 1. Buscar todas las citas de esta mascota
+        const { data: citas, error: errorCitas } = await supabase
+            .from('cita')
+            .select('id_cita')
+            .eq('id_mascota', id);
+
+        if (errorCitas) throw errorCitas;
+        if (!citas || citas.length === 0) return res.json([]);
+
+        const idsCitas = citas.map(c => c.id_cita);
+
+        // 2. Buscar historias clínicas de esas citas
+        const { data: historias, error: errorHistorias } = await supabase
+            .from('historia_clinica')
+            .select('id_historia')
+            .in('id_cita', idsCitas);
+
+        if (errorHistorias) throw errorHistorias;
+        if (!historias || historias.length === 0) return res.json([]);
+
+        const idsHistorias = historias.map(h => h.id_historia);
+
+        // 3. Buscar prescripciones de esas historias, con datos del medicamento
+        const { data: prescripciones, error: errorPrescripciones } = await supabase
+            .from('prescripcion')
+            .select(`
+                id_prescripcion,
+                dosis,
+                cantidad,
+                entregado,
+                id_historia,
+                medicamento (
+                    id_medicamento,
+                    nombre
+                )
+            `)
+            .in('id_historia', idsHistorias);
+
+        if (errorPrescripciones) throw errorPrescripciones;
+
+        res.json(prescripciones || []);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};

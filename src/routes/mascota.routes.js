@@ -4,12 +4,14 @@ import {
     obtenerMascotaPorId,
     crearMascota,
     actualizarMascota,
-    eliminarMascota
-} from '../controllers/mascota.controllers.js'; // 💡 Asegurado en singular
+    eliminarMascota,
+    obtenerMedicamentosPorMascota  // ← ¿está importado?
+} from '../controllers/mascota.controllers.js';
 
 const router = express.Router();
 
 router.get('/', obtenerMascotas);
+router.get('/:id/medicamentos', obtenerMedicamentosPorMascota);  // ← ANTES de /:id
 router.get('/:id', obtenerMascotaPorId);
 router.post('/', crearMascota);
 router.put('/:id', actualizarMascota);
