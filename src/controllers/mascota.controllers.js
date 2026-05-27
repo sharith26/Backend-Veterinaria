@@ -2,10 +2,17 @@ import { supabase } from '../config/supabase.js';
 
 export const obtenerMascotas = async (req, res) => {
     try {
-        // Usamos '*' en una sola línea para evitar errores de mapeo en la URL de la API
         const { data, error } = await supabase
             .from('mascota')
-            .select('*'); 
+            .select(`
+                id_mascota,
+                nombre,
+                fecha_nacimiento,
+                activo,
+                especie:id_especie (nombre_especie),
+                raza:id_raza (nombre_raza),
+                propietario:id_propietario (nombres, apellidos)
+            `);
 
         if (error) throw error;
         res.json(data);
