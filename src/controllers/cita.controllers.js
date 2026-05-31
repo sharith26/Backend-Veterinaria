@@ -2,11 +2,27 @@ import { supabase } from '../config/supabase.js';
 
 export const obtenerCitas = async (req, res) => {
     try {
-    const { data, error } = await supabase.from('cita').select('*');
-    if (error) throw error;
-    res.json(data);
-} catch (error) {
-    res.status(500).json({ error: error.message });
+        const { data, error } = await supabase
+            .from('cita')
+            .select(`
+                id_cita,
+                fecha,
+                hora,
+                motivo,
+                estado,
+                mascota:id_mascota (id_mascota, nombre),
+                veterinario:id_veterinario (
+                    id_veterinario,
+                    especialidad,
+                    usuario:id_usuario (nombre_completo)
+                )
+            `)
+            .order('fecha', { ascending: false });
+
+        if (error) throw error;
+        res.json(data);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
     }
 };
 
