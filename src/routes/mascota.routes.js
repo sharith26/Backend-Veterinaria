@@ -1,4 +1,5 @@
 import express from 'express';
+
 import {
     obtenerMascotas,
     obtenerMascotaPorId,
@@ -6,12 +7,14 @@ import {
     actualizarMascota,
     eliminarMascota,
     obtenerMedicamentosPorMascota,
-    obtenerHistorialPorMascota
+    obtenerHistorialPorMascota,
+    obtenerMascotasPorPropietario 
 } from '../controllers/mascota.controllers.js';
 
 const router = express.Router();
 
 router.get('/', obtenerMascotas);
+router.get('/filtrar', obtenerMascotasPorPropietario); 
 router.get('/:id/medicamentos', obtenerMedicamentosPorMascota);
 router.get('/:id/historial', obtenerHistorialPorMascota);
 router.get('/:id', obtenerMascotaPorId);

@@ -191,4 +191,30 @@ export const obtenerHistorialPorMascota = async (req, res) => {
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
+}; // <--- Se cierra correctamente la función anterior
+
+export const obtenerMascotasPorPropietario = async (req, res) => {
+    try {
+        const { id_propietario } = req.query;
+
+        if (!id_propietario) {
+            return res.status(400).json({ error: "El ID del propietario es requerido" });
+        }
+
+        const { data, error } = await supabase
+            .from('mascota')
+            .select(`
+                id_mascota,
+                nombre,
+                id_propietario
+            `)
+            .eq('id_propietario', id_propietario)
+            .eq('activo', true);
+
+        if (error) throw error;
+
+        res.json(data || []);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
 };
