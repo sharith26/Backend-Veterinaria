@@ -1,51 +1,68 @@
 import { supabase } from '../config/supabase.js';
 
 export const obtenerVeterinarios = async (req, res) => {
-  try {
+    try {
+        
+        console.log('=== ENTRÓ A OBTENER VETERINARIOS ===');
 
-    console.log('=== ENTRÓ A OBTENER VETERINARIOS ===');
+        // 1. Obtenemos TODOS los veterinarios (incluídos los que no tienen relación)
+        const { data: veterinarios, error: errorVet } = await supabase
+            .from('veterinario')
+            .select('*');
 
-    const { data: prueba, error: errorPrueba } = await supabase
-      .from('veterinario')
-      .select('*');
+        if (errorVet) throw errorVet;
 
-    console.log('Error prueba:', errorPrueba);
-    console.log('Cantidad registros:', prueba?.length);
+        console.log('VETERINARIOS BRUTOS:', veterinarians?.length);
 
-    const { data, error } = await supabase
-      .from('veterinario')
-      .select(`
-        id_veterinario,
-        tarjeta_profesional,
-        id_usuario,
-        id_especialidad,
-        especialidad:id_especialidad (
-          id_especialidad,
-          nombre
-        ),
-        usuario:id_usuario (
-          id_usuario,
-          nombre_completo,
-          email,
-          telefono
-        )
-      `);
+        if (!veterinarios || veterinarios.length === 0) {
+            return res.json([]);
+        }
 
-    console.log('Error consulta principal:', error);
+        // 2. Obtenemos TODOS los usuarios (sin filtro)
+        const { data: todosUsuarios } = await supabase
+            .from('usuario')
+            .select('id_usuario, nombre_completo, email, telefono');
 
-    if (error) throw error;
+        const usuariosData = {};
+        if (todosUsuarios) {
+            todosUsuarios.forEach(u => usuariosData[u.id_usuario] = u);
+        }
 
-    res.json(data);
+        // 3. Obtenemos TODAS las especialidades
+        const { data: todasEspecialidades } = await supabase
+            .from('especialidad')
+            .select('id_especialidad, nombre');
 
-  } catch (error) {
-    console.error('ERROR COMPLETO:', error);
+        const especialidadesData = {};
+        if (todasEspecialidades) {
+            todasEspecialidades.forEach(e => especialidadesData[e.id_especialidad] = e);
+        }
 
-    res.status(500).json({
-      error: error.message,
-      detalle: error
-    });
-  }
+        // 4. ARMAMOS LA RESPUESTA (incluye los que no tienen relación)
+        const respuestaFinal = veterinarios.map(vet => ({
+            id_veterinario: vet.id_veterinario,
+            tarjeta_profesional: vet.tarjeta_profesional,
+            // Si el usuario no existe,devuelve null (como espera el Front)
+            usuario: usuariosData[vet.id_usuario] || null,
+            especialidad: especialidadesData[vet.id_especialidad] || null,
+            id_usuario: vet.id_usuario,
+            id_especialidad: vet.id_especialidad
+        }));
+
+        console.log('RESPUESTA FINAL:', respuestaFinal);
+
+        res.json(respuestaFinal);
+
+    } catch (error) {
+        console.error('ERROR COMPLETO:', error);
+        res.status(500).json({
+            error: error.message,
+            detalle: error
+        });
+    }
 };
+
+// ... resto del código igual
 
 export const obtenerVeterinarioPorId = async (req, res) => {
     try {
