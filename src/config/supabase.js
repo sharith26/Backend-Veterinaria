@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-const supabaseUrl = 'https://gsogbwkggoczxsuumwji.supabase.co'
+const supabaseUrl = 'https://gsogbwkggoczxsuumwji.supabase.co/rest/v1/'
 const supabaseKey = 'sb_publishable_lJqqDGCB0p7X90L6MWKJvA_fNTY2o1W';
 
 console.log("=== CONEXIÓN DIRECTA ACTIVADA ===");
