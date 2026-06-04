@@ -1,4 +1,10 @@
 import { supabase } from '../config/supabase.js';
+import crypto from 'crypto';
+
+// Función auxiliar para hashear contraseñas
+const hashPassword = (password) => {
+    return crypto.createHash('sha256').update(password).digest('hex');
+};
 
 export const login = async (req, res) => {
     try {
@@ -7,6 +13,9 @@ export const login = async (req, res) => {
         if (!email || !contrasena) {
             return res.status(400).json({ error: "El correo y la contraseña son obligatorios." });
         }
+
+        // Hasheamos la contraseña recibida para compararla con la base de datos
+        const contrasenaHash = hashPassword(contrasena);
 
         const { data: usuario, error } = await supabase
             .from('usuario')
@@ -22,12 +31,12 @@ export const login = async (req, res) => {
             .eq('email', email)
             .single();
 
-        if (error || !usuario || usuario.contrasena !== contrasena) {
+        // Comparamos el hash recibido con el hash almacenado
+        if (error || !usuario || usuario.contrasena !== contrasenaHash) {
             return res.status(401).json({ error: "Correo electrónico o contraseña incorrectos." });
         }
 
         const nombreRol = usuario.rol ? usuario.rol.nombre_rol : 'Consultas';
-
         const payload = { id: usuario.id_usuario, rol: nombreRol, exp: Date.now() + 28800000 };
         const tokenToken = btoa(JSON.stringify(payload));
 
@@ -40,12 +49,49 @@ export const login = async (req, res) => {
                 rol: nombreRol
             }
         });
-
     } catch (error) {
         return res.status(500).json({ error: error.message });
     }
 };
 
+export const crearUsuario = async (req, res) => {
+    try {
+        const { nombre_completo, email, contrasena, activo, telefono, id_rol } = req.body;
+        
+        // Validación básica antes de ir a la BD
+        if (!email || !contrasena) {
+            return res.status(400).json({ error: "El email y la contraseña son obligatorios" });
+        }
+
+        const contrasenaHash = hashPassword(contrasena);
+
+        const { data, error } = await supabase
+            .from('usuario')
+            .insert([{ 
+                nombre_completo, 
+                email, 
+                contrasena: contrasenaHash, 
+                activo: activo ?? true, // Valor por defecto
+                telefono, 
+                id_rol 
+            }])
+            .select();
+        
+        if (error) {
+            // AQUÍ ESTÁ EL TRUCO: Imprime el error completo en el servidor
+            console.error("Error detallado de Supabase:", error);
+            return res.status(400).json({ 
+                error: "Error al crear usuario", 
+                detalles: error.message,
+                hint: error.hint // Supabase a veces da una pista del error (ej. llave duplicada)
+            });
+        }
+        
+        return res.status(201).json(data[0]);
+    } catch (error) {
+        return res.status(500).json({ error: "Error interno del servidor", detalle: error.message });
+    }
+};
 export const obtenerUsuarios = async (req, res) => {
     try {
         const { data, error } = await supabase
@@ -72,21 +118,6 @@ export const obtenerUsuarioPorId = async (req, res) => {
         return res.json(data);
     } catch (error) {
         return res.status(500).json({ error: error.message });
-    }
-};
-
-export const crearUsuario = async (req, res) => {
-    try {
-        const { nombre_completo, email, contrasena, activo, telefono, id_rol } = req.body;
-        const { data, error } = await supabase
-            .from('usuario')
-            .insert([{ nombre_completo, email, contrasena, activo, telefono, id_rol }])
-            .select();
-        
-        if (error) throw error;
-        return res.status(201).json(data[0]);
-    } catch (error) {
-        return res.status(400).json({ error: error.message });
     }
 };
 

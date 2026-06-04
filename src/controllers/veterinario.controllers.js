@@ -5,21 +5,10 @@ export const obtenerVeterinarios = async (req, res) => {
         const { data, error } = await supabase
             .from('veterinario')
             .select(`
-                id_veterinario,
-                tarjeta_profesional,
-                id_usuario,
-                id_especialidad,
-                especialidad:id_especialidad (
-                    id_especialidad,
-                    nombre
-                ),
-                usuario:id_usuario (
-                    id_usuario,
-                    nombre_completo,
-                    email,
-                    telefono
-                )
-            `)
+                *,
+                usuario:id_usuario (nombre_completo),
+                especialidad:id_especialidad (nombre)
+            `) // Esto recrea el objeto anidado que tu HTML espera
             .order('id_veterinario', { ascending: true });
 
         if (error) throw error;
@@ -42,24 +31,52 @@ export const obtenerVeterinarioPorId = async (req, res) => {
 
 export const crearVeterinario = async (req, res) => {
     try {
-    const { especialidad, tarjeta_profesional, id_usuario } = req.body;
-    const { data, error } = await supabase.from('veterinario').insert([{ especialidad, tarjeta_profesional, id_usuario }]).select();
-    if (error) throw error;
-    res.status(201).json(data[0]);
-} catch (error) {
-    res.status(400).json({ error: error.message });
+        const { id_especialidad, tarjeta_profesional, id_usuario } = req.body;
+
+        const { data, error } = await supabase
+            .from('veterinario')
+            .insert([
+                {
+                    tarjeta_profesional,
+                    id_usuario,
+                    id_especialidad
+                }
+            ])
+            .select();
+
+        if (error) throw error;
+
+        res.status(201).json(data[0]);
+    } catch (error) {
+        res.status(400).json({ error: error.message });
     }
 };
 
 export const actualizarVeterinario = async (req, res) => {
     try {
-    const { id } = req.params;
-    const { especialidad, tarjeta_profesional, id_usuario } = req.body;
-    const { data, error } = await supabase.from('veterinario').update({ especialidad, tarjeta_profesional, id_usuario }).eq('id_veterinario', id).select();
-    if (error) throw error;
-    res.json(data[0]);
-} catch (error) {
-    res.status(400).json({ error: error.message });
+        const { id } = req.params;
+
+        const {
+            id_especialidad,
+            tarjeta_profesional,
+            id_usuario
+        } = req.body;
+
+        const { data, error } = await supabase
+            .from('veterinario')
+            .update({
+                tarjeta_profesional,
+                id_usuario,
+                id_especialidad
+            })
+            .eq('id_veterinario', id)
+            .select();
+
+        if (error) throw error;
+
+        res.json(data[0]);
+    } catch (error) {
+        res.status(400).json({ error: error.message });
     }
 };
 

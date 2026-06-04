@@ -2,6 +2,11 @@ export const protegerRuta = (req, res, next) => {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1]; 
 
+
+    if (!authHeader) {
+        return res.status(400).json({ error: "Acceso denegado", message: "Token de sesión no proporcionado." });
+    }
+
     if (!token) {
         return res.status(401).json({ error: "Acceso denegado", message: "Token de sesión no proporcionado." });
     }

@@ -64,6 +64,8 @@ app.use('/api/usuarios', usuarioRoutes);
 app.use('/api/veterinario', veterinarioRoutes);
 app.use('/api/veterinarios', veterinarioRoutes);
 
+console.log('SUPABASE_URL:', process.env.SUPABASE_URL);
+
 app.get('/', (req, res) => {
     res.json({ message: "API de la Clínica Veterinaria ejecutándose correctamente de forma síncrona." });
 });

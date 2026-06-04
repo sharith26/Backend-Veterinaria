@@ -12,6 +12,7 @@ import { protegerRuta, verificarRol } from '../config/middlewares/auth.middlewar
 const router = Router();
 
 router.post('/login', login);
+router.post('/', crearUsuario);
 
 router.get('/', protegerRuta, verificarRol(['Consultas']), obtenerUsuarios);
 router.get('/:id', protegerRuta, verificarRol(['Consultas']), obtenerUsuarioPorId);
