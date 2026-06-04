@@ -3,11 +3,14 @@ import { supabase } from '../config/supabase.js';
 export const obtenerVeterinarios = async (req, res) => {
   try {
 
-    const { data: prueba } = await supabase
+    console.log('=== ENTRÓ A OBTENER VETERINARIOS ===');
+
+    const { data: prueba, error: errorPrueba } = await supabase
       .from('veterinario')
       .select('*');
 
-    console.log('TOTAL REGISTROS:', prueba?.length);
+    console.log('Error prueba:', errorPrueba);
+    console.log('Cantidad registros:', prueba?.length);
 
     const { data, error } = await supabase
       .from('veterinario')
@@ -28,14 +31,22 @@ export const obtenerVeterinarios = async (req, res) => {
         )
       `);
 
+    console.log('Error consulta principal:', error);
+
     if (error) throw error;
 
     res.json(data);
 
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('ERROR COMPLETO:', error);
+
+    res.status(500).json({
+      error: error.message,
+      detalle: error
+    });
   }
 };
+
 export const obtenerVeterinarioPorId = async (req, res) => {
     try {
     const { id } = req.params;
