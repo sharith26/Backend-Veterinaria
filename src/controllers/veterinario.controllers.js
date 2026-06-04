@@ -1,23 +1,41 @@
 import { supabase } from '../config/supabase.js';
 
 export const obtenerVeterinarios = async (req, res) => {
-    try {
-        const { data, error } = await supabase
-            .from('veterinario')
-            .select(`
-                *,
-                usuario:id_usuario (nombre_completo),
-                especialidad:id_especialidad (nombre)
-            `) // Esto recrea el objeto anidado que tu HTML espera
-            .order('id_veterinario', { ascending: true });
+  try {
 
-        if (error) throw error;
-        res.json(data);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
+    const { data: prueba } = await supabase
+      .from('veterinario')
+      .select('*');
+
+    console.log('TOTAL REGISTROS:', prueba?.length);
+
+    const { data, error } = await supabase
+      .from('veterinario')
+      .select(`
+        id_veterinario,
+        tarjeta_profesional,
+        id_usuario,
+        id_especialidad,
+        especialidad:id_especialidad (
+          id_especialidad,
+          nombre
+        ),
+        usuario:id_usuario (
+          id_usuario,
+          nombre_completo,
+          email,
+          telefono
+        )
+      `);
+
+    if (error) throw error;
+
+    res.json(data);
+
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 };
-
 export const obtenerVeterinarioPorId = async (req, res) => {
     try {
     const { id } = req.params;
