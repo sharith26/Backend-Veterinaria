@@ -40,7 +40,6 @@ export const obtenerCitaPorId = async (req, res) => {
     }
 };
 
-// ✅ Citas filtradas por mascota — solo campos necesarios para el dropdown
 export const obtenerCitasPorMascota = async (req, res) => {
     try {
         const { idMascota } = req.params;

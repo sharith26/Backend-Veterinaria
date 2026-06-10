@@ -191,7 +191,7 @@ export const obtenerHistorialPorMascota = async (req, res) => {
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
-}; // <--- Se cierra correctamente la función anterior
+}; 
 
 export const obtenerMascotasPorPropietario = async (req, res) => {
     try {

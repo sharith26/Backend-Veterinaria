@@ -15,7 +15,6 @@ export const obtenerDetallesFactura = async (req, res) => {
 
     console.log("📊 Datos obtenidos de Supabase:", data);
     
-    // Si la tabla está vacía, esto devolverá [] pero ya no se quedará en blanco
     return res.json(data);
 
   } catch (error) {
